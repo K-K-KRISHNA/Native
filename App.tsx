@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { SafeAreaView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
+import SampleFlatlist from './src/components/SampleFlatlist';
 
 const App = () => {
   useEffect(()=>{
@@ -8,9 +9,7 @@ const App = () => {
   },[]);
   return (
     <SafeAreaView>
-    <View>
-      <Text>App</Text>
-    </View>
+    <SampleFlatlist/>
     </SafeAreaView>
   )
 }
