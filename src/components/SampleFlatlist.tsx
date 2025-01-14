@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import {
-    responsiveScreenHeight,
-    responsiveScreenWidth,
+  check,
+  openSettings,
+  PERMISSIONS,
+  request,
+} from 'react-native-permissions';
+import {
+  responsiveScreenHeight,
+  responsiveScreenWidth,
 } from 'react-native-responsive-dimensions';
 import FeatherIcons from 'react-native-vector-icons/Feather';
+import RNFetchBlob from 'rn-fetch-blob';
+
 type ApiResponse<BEData> = {
   data: BEData;
   status: 'INITIAL' | 'SUCCCESS' | 'FAIL' | 'LOADING';
@@ -69,6 +79,84 @@ const SampleFlatlist = () => {
         status: 'FAIL',
         errorMessage: String(errorMessage),
       });
+    }
+  };
+
+  const actualDownload = async (url: string, index: string) => {
+    const havePermission = await checkPermission();
+    console.log(havePermission, 'permission');
+    if (!havePermission) return;
+    const {dirs} = RNFetchBlob.fs;
+    const dirToSave =
+      Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir;
+    const configfb = {
+      fileCache: true,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        mediaScannable: true,
+        title: `image-${index}.jpg`,
+        path: `${dirs.DownloadDir}/image-${index}.jpg`,
+      },
+      useDownloadManager: true,
+      notification: true,
+      mediaScannable: true,
+      title: 'image-${index}.jpg',
+      path: `${dirToSave}/image-${index}.jpg`,
+    };
+    const configOptions = Platform.select({
+      ios: configfb,
+      android: configfb,
+    });
+
+    RNFetchBlob.config(configOptions || {})
+      .fetch('GET', url, {})
+      .then(res => {
+        if (Platform.OS === 'ios') {
+          RNFetchBlob.fs.writeFile(configfb.path, res.data, 'base64');
+          RNFetchBlob.ios.previewDocument(configfb.path);
+        }
+        if (Platform.OS === 'android') {
+          console.log('file downloaded');
+        }
+      })
+      .catch(e => {
+        console.log('invoice Download==>', e);
+      });
+  };
+
+  const checkPermission = async () => {
+    const requiredPermission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.PHOTO_LIBRARY_ADD_ONLY
+        : PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
+    if (Platform.OS === 'android' && Platform.Version > 29) {
+      return true;
+    }
+    const isGranted = await check(requiredPermission);
+    switch (isGranted) {
+      case 'unavailable':
+        Alert.alert('Sorry', 'This is feature not available');
+        return false;
+      case 'blocked':
+        Alert.alert('Oops!', 'We Need Write Storage Access Please Grant', [
+          {
+            text: 'Cancel',
+          },
+          {
+            text: 'Open Settings',
+            onPress: () => openSettings(),
+          },
+        ]);
+        return false;
+      case 'denied':
+        const result = await request(requiredPermission);
+        if (result === 'granted') {
+          return true;
+        }
+        return false;
+      default:
+        return true;
     }
   };
 
@@ -135,10 +223,13 @@ const SampleFlatlist = () => {
                   <Text style={{width: '100%'}}>Author: {item.author}</Text>
                   <Text>dn: {`${item.width} X ${item.height}`}</Text>
                 </View>
-                <View>
+                <TouchableOpacity
+                  onPress={async () => {
+                    actualDownload(item.download_url, item.id);
+                  }}>
                   <FeatherIcons name="download" size={25} />
                   <Text style={{fontWeight: '700'}}>Download</Text>
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
           );
