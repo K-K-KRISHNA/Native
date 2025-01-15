@@ -37,7 +37,7 @@ type Product = {
   download_url: string;
 };
 
-const SampleFlatlist = () => {
+const DownloadImage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [apiProducts, setApiProducts] = useState<ApiResponse<Product[]>>({
     data: [],
@@ -239,4 +239,4 @@ const SampleFlatlist = () => {
   );
 };
 
-export default SampleFlatlist;
+export default DownloadImage;

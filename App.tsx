@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
 import { SafeAreaView } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
-import SampleFlatlist from './src/components/SampleFlatlist';
+import ImagePicker from './src/components/ImagePicker';
 
 const App = () => {
-  useEffect(()=>{
+  useEffect(() => {
     SplashScreen.hide();
-  },[]);
+  }, []);
   return (
     <SafeAreaView>
-    <SampleFlatlist/>
+      <ImagePicker />
     </SafeAreaView>
-  )
-}
+  );
+};
 
-export default App
+export default App;
