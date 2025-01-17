@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { SafeAreaView } from 'react-native';
+import React, {useEffect} from 'react';
+import {SafeAreaView} from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
-import ImagePicker from './src/components/ImagePicker';
+import Notification from './src/components/Notification';
 
 const App = () => {
   useEffect(() => {
@@ -9,7 +9,7 @@ const App = () => {
   }, []);
   return (
     <SafeAreaView>
-      <ImagePicker />
+      <Notification />
     </SafeAreaView>
   );
 };
